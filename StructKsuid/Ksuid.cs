@@ -3,9 +3,18 @@ using System.Text;
 
 namespace StructKsuid;
 
+/// <summary>
+/// A K-Sortable unique identifier that is sortable in data and lexically (ToString())
+/// </summary>
 public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
 {
+    /// <summary>
+    /// Maximum possible value. All bytes are 255
+    /// </summary>
     public static readonly Ksuid MaxValue = new Ksuid(uint.MaxValue, ulong.MaxValue, ulong.MaxValue);
+    /// <summary>
+    /// Same as an empty/default Ksuid, where all bytes are 0.
+    /// </summary>
     public static Ksuid MinValue => new Ksuid();
     
     private const int EncodedSize = 27;
@@ -179,14 +188,28 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
     #endregion
 
     #region Comparison and Equality
+    
+    /// <summary>
+    /// Structural equality comparison
+    /// </summary>
     public bool Equals(Ksuid other) =>
         _timestamp == other._timestamp &&
         _a == other._a && _b == other._b;
 
+    /// <summary>
+    /// Type and structural equality comparison for Ksuid
+    /// </summary>
     public override bool Equals(object? obj) => obj is Ksuid other && Equals(other);
 
+    /// <summary>
+    /// A hash of the timestamp and data payloads
+    /// </summary>
     public override int GetHashCode() => HashCode.Combine(_timestamp, _a, _b);
 
+    /// <summary>
+    /// Returns the comparison between two Ksuids, starting first by checking the timestamp,
+    /// then the top-level payload, then the second-level payload.
+    /// </summary>
     public int CompareTo(Ksuid other)
     {
         var total = _timestamp.CompareTo(other._timestamp);
@@ -199,13 +222,22 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         return total;
     }
 
+    /// <summary>
+    /// Structural equality comparison
+    /// </summary>
     public static bool operator ==(Ksuid a, Ksuid b) => a.Equals(b);
 
+    /// <summary>
+    /// Structural equality comparison
+    /// </summary>
     public static bool operator !=(Ksuid a, Ksuid b) => !a.Equals(b);
 
     #endregion
 
 
+    /// <summary>
+    /// Returns the lexically sortable string representation of the ksuid value.
+    /// </summary>
     public override string ToString()
     {
         Span<byte> encoded = stackalloc byte[EncodedSize];
