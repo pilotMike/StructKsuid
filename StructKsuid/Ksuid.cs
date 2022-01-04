@@ -41,6 +41,9 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         _b = ulongs[1];
     }
 
+    /// <summary>
+    /// Returns the UTC timestamp as a DateTime object.
+    /// </summary>
     public DateTime TimestampUtc => DateTime.UnixEpoch.AddSeconds(Epoch + _timestamp);
 
     /// <summary>
