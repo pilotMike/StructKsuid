@@ -4,6 +4,9 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Title>StructKsuid</Title>
+        <Description>A struct based, no alloc implementation of KSUID, with Ksuids sortable based on the order they were created.</Description>
+        <Authors>Michael DiLeo</Authors>
     </PropertyGroup>
 
 </Project>
