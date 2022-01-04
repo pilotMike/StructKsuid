@@ -31,10 +31,10 @@ this implementation has to copy the 3 parts of the payload instead of passing th
 reference to the byte array.
 
 Creating a new Ksuid
-![](../create benchmarks.png)
+![](/create benchmarks.png)
 
 Parsing
-![](../parse benchmarks.png)
+![](/parse benchmarks.png)
 
 # Usage
 I tried to keep the API close to the dotnet Guid API.
