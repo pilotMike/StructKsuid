@@ -1,4 +1,7 @@
-﻿namespace StructKsuid;
+﻿using System;
+using System.Collections.Generic;
+
+namespace StructKsuid.Tests;
 
 public static class ReferenceBase62
 {

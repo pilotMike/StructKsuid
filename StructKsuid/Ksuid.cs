@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
 namespace StructKsuid;
@@ -18,23 +17,16 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
     /// KSUID's epoch starts more recently so that the 32-bit number space gives a
     /// significantly higher useful lifetime of around 136 years from March 2017.
     /// This number (14e8) was picked to be easy to remember.
+    /// This is taken from the segment.io implementation.
     /// </summary>
     private const uint Epoch = 1400000000;
 
-    
-    
-    //private readonly byte[] _payload; // timestamp(4) + random bytes(16)
     private readonly uint _timestamp;
     private readonly ulong _a;
     private readonly ulong _b;
 
     private Ksuid(uint timestamp, ulong bytesA, ulong bytesB)
     {
-        //Span<uint> timearray = stackalloc uint[1] { timestamp };
-        // if (BitConverter.IsLittleEndian)
-        // {
-        //     ReverseTimestamp(MemoryMarshal.Cast<uint, byte>(timearray));
-        // }
         _timestamp = timestamp;
         _a = bytesA;
         _b = bytesB;
@@ -43,14 +35,7 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
     private Ksuid(ReadOnlySpan<byte> bytes)
     {
         _timestamp = MemoryMarshal.Cast<byte, uint>(bytes)[0];
-        // if (BitConverter.IsLittleEndian)
-        // {
-        //     Span<byte> ts = stackalloc byte[TimestampSize];
-        //     var tsuint = MemoryMarshal.Cast<byte, uint>(ts);
-        //     tsuint[0] = _timestamp;
-        //     ReverseTimestamp(ts);
-        //     _timestamp = tsuint[0];
-        // }
+        
         var ulongs = MemoryMarshal.Cast<byte, ulong>(bytes[4..]);
         _a = ulongs[0];
         _b = ulongs[1];
@@ -58,7 +43,9 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
 
     public DateTime TimestampUtc => DateTime.UnixEpoch.AddSeconds(Epoch + _timestamp);
 
-
+    /// <summary>
+    /// Returns the Ksuid data as a byte array.
+    /// </summary>
     public byte[] GetBytes()
     {
         var bytes = new byte[20];
@@ -68,8 +55,34 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
 
     #region Static Members
     
-    public static Ksuid NewKsuid() => FromTimestamp(DateTime.Now);
+    /// <summary>
+    /// Returns a new Ksuid that increments from the last if the timestamps match.
+    /// This locks on the payload generation for tracking, but ensures that any Ksuids
+    /// created in sequence are sortable.
+    /// </summary>
+    public static Ksuid NextKsuid() => FromTimestamp(DateTime.Now);
 
+    /// <summary>
+    /// Returns a new Ksuid based off of the current timestamp with a random payload.
+    /// Any Ksuids created with this method within the same second are not
+    /// going to be sortable based on when they were created.
+    /// </summary>
+    public static Ksuid RandomKsuid()
+    {
+        var time = (uint)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() - Epoch);
+        Span<byte> payload = stackalloc byte[PayloadSize + 4];
+        InternalRandom.NextRandomBytes(payload[TimestampSize..]);
+        
+        // prepend timestamp
+        var timestampSpan = MemoryMarshal.Cast<byte, uint>(payload);
+        timestampSpan[0] = time;
+        
+        return new Ksuid(payload);
+    }
+
+    /// <summary>
+    /// Returns a new Ksuid with the given timestamp and a random payload.
+    /// </summary>
     public static Ksuid FromTimestamp(DateTime timestamp)
     {
         var time = (uint)(((DateTimeOffset)timestamp).ToUnixTimeSeconds() - Epoch);
@@ -77,6 +90,9 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         return FromTimestamp(time);
     }
 
+    /// <summary>
+    /// Returns a new Ksuid with the given timestamp and a random payload.
+    /// </summary>
     public static Ksuid FromTimestamp(uint timestamp)
     {
         Span<byte> payload = stackalloc byte[PayloadSize + 4];
@@ -85,11 +101,16 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         // prepend timestamp
         var timestampSpan = MemoryMarshal.Cast<byte, uint>(payload);
         timestampSpan[0] = timestamp;
-        // if (BitConverter.IsLittleEndian)
-        //     ReverseTimestamp(payload);
+        
         return new Ksuid(payload);
     }
 
+    /// <summary>
+    /// Parses a base62 encoded Ksuid string into an instance.
+    /// </summary>
+    /// <param name="ksuidText">length 27</param>
+    /// <exception cref="ArgumentException">if the string is null or not of length 27</exception>
+    /// <exception cref="IndexOutOfRangeException">If the string is invalid, this will be the likely exception</exception>
     public static Ksuid Parse(string ksuidText)
     {
         if (ksuidText?.Length != 27)
@@ -100,6 +121,12 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         return new Ksuid(timestamp, a, b);
     }
 
+    /// <summary>
+    /// Parses a base62 encoded Ksuid string into an instance.
+    /// </summary>
+    /// <param name="ksuidText">length 27</param>
+    /// <param name="ksuid">resultant ksuid. default on failure</param>
+    /// <returns>bool success</returns>
     public static bool TryParse(string ksuidText, out Ksuid ksuid)
     {
         if (ksuidText?.Length != 27)
@@ -137,14 +164,10 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
     
     #region Helpers
 
-    //private static void ReverseTimestamp(Span<byte> timestamp) => timestamp[..TimestampSize].Reverse();
-    
     private void AsBytes(Span<byte> current)
     {
         MemoryMarshal.Cast<byte, uint>(current)[0] = _timestamp;
-        // if (BitConverter.IsLittleEndian)
-        //     ReverseTimestamp(current);
-
+        
         var ulongs = MemoryMarshal.Cast<byte, ulong>(current[4..]);
         ulongs[0] = _a;
         ulongs[1] = _b;
@@ -164,8 +187,12 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
     public int CompareTo(Ksuid other)
     {
         var total = _timestamp.CompareTo(other._timestamp);
-        total += _b.CompareTo(other._b);
-        total += _a.CompareTo(other._a);
+        if (total != 0) return total;
+        
+        total = _a.CompareTo(other._a);
+        if (total != 0) return total;
+        
+        total = _b.CompareTo(other._b);
         return total;
     }
     
@@ -182,5 +209,4 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         
         return Encoding.UTF8.GetString(encoded);
     }
-
 }

@@ -16,14 +16,14 @@ internal static class InternalRandom
     private static ulong lastPayloadB;
     
     // dot KSUID uses this approach, but I don't think it will work for my use case
-    // private static readonly Random GlobalRandom = new ();
-    // private static readonly ThreadLocal<Random> LocalRandom = new (() =>
-    // {
-    //     lock (GlobalRandom)
-    //     {
-    //         return new Random(GlobalRandom.Next());
-    //     }
-    // });
+    private static readonly Random GlobalRandom = new ();
+    private static readonly ThreadLocal<Random> LocalRandom = new (() =>
+    {
+        lock (GlobalRandom)
+        {
+            return new Random(GlobalRandom.Next());
+        }
+    });
 
 
     /// <summary>
@@ -43,6 +43,7 @@ internal static class InternalRandom
         {
             if (lastTimestamp == timestamp && lastPayloadB != default)
             {
+                // do a 128-bit add that overflows into the timestamp, as done in https://github.com/segmentio/ksuid/blob/d24e51dda38d4a3994a500616c71cd36ec385889/ksuid.go#L325
                 unchecked
                 {
                     lastPayloadB += 1;
@@ -67,4 +68,10 @@ internal static class InternalRandom
             lastTimestamp = timestamp;
         }
     }
+
+    /// <summary>
+    /// Thread-safe. Creates a random payload. Does not track the last item created and cannot guarantee sortability
+    /// of the payload.
+    /// </summary>
+    public static void NextRandomBytes(Span<byte> bytes) => LocalRandom.Value!.NextBytes(bytes);
 }

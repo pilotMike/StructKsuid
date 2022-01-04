@@ -9,7 +9,10 @@ public class CreateNewBenchmarks
     public KSUID.Ksuid KsuidGenerate() => KSUID.Ksuid.Generate();
 
     [Benchmark]
-    public StructKsuid.Ksuid StructNewKsuid() => StructKsuid.Ksuid.NewKsuid();
+    public StructKsuid.Ksuid StructNextKsuid() => StructKsuid.Ksuid.NextKsuid();
+    
+    [Benchmark]
+    public StructKsuid.Ksuid StructRandomKsuid() => StructKsuid.Ksuid.RandomKsuid();
 
     [Benchmark]
     public DotKsuid.Ksuid DotKsuidNewKsuid() => DotKsuid.Ksuid.NewKsuid();

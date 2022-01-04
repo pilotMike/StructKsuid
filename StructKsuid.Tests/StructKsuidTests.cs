@@ -8,12 +8,10 @@ namespace StructKsuid.Tests;
 [TestFixture]
 public class StructKsuidTests
 {
-    
-    
     [Test]
     public void CanConvertAndDeconvert()
     {
-        var s = Ksuid.NewKsuid().ToString();
+        var s = Ksuid.NextKsuid().ToString();
         var ksuid = StructKsuid.Ksuid.Parse(s);
         var toString = ksuid.ToString();
         Assert.AreEqual(s, toString);
@@ -36,9 +34,9 @@ public class StructKsuidTests
     }
 
     [Test]
-    public void NewKsuid_ReturnsKsuid_WithCurrentTimestampComponent()
+    public void NextKsuid_ReturnsKsuid_WithCurrentTimestampComponent()
     {
-        var x = Ksuid.NewKsuid().TimestampUtc;
+        var x = Ksuid.NextKsuid().TimestampUtc;
         var now = DateTime.UtcNow;
         var nowTime = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
         var xTime = new DateTime(x.Year, x.Month, x.Day, x.Hour, x.Minute, x.Second);
@@ -47,46 +45,45 @@ public class StructKsuidTests
     }
 
     [Test]
-    public void NewKsuid_ReturnsSortedIds_WhenTheTimestampsAreTheSame()
+    public void NextKsuid_ReturnsSortedIds_WhenTheTimestampsAreTheSame()
     {
-        var a = Ksuid.NewKsuid();
-        var b = Ksuid.NewKsuid();
+        var a = Ksuid.NextKsuid();
+        var b = Ksuid.NextKsuid();
         Assert.Greater(0, a.CompareTo(b));
 
-        var ids1 = Enumerable.Range(0, 10).Select(_ => Ksuid.NewKsuid()).ToArray();
+        var ids1 = Enumerable.Range(0, 10).Select(_ => Ksuid.NextKsuid()).ToArray();
         var sorted = ids1.ToArray();
         Array.Sort(sorted, Comparer<Ksuid>.Default);
         
         CollectionAssert.AreEqual(ids1, sorted);
     }
 
-    // this test is wrong because right now b/c string sorting ignores casing. this cost me a few hours
-    // [Test]
-    // public void NewKsuid_ReturnsLexicallySortableIds_BasedOnGenerationSequence()
-    // {
-    //     for (int i = 0; i < 20; i++)
-    //     {
-    //         var ids1 = Enumerable.Range(0, 10).Select(_ => Ksuid.NewKsuid().ToString()).ToArray();
-    //         var sorted = ids1.OrderBy(x => x).ToArray();
-    //         
-    //         TestContext.WriteLine(string.Join("\n",ids1.Select(x => 
-    //             string.Join(";",  Ksuid.Parse(x).GetBytes().Select(b => b.ToString("000")).ToArray()) + " - " + x )));
-    //         TestContext.WriteLine(string.Join("\n", sorted.Select(x => 
-    //             string.Join(";", Ksuid.Parse(x).GetBytes().Select(b => b.ToString("000")).ToArray()) + " - " + x )));
-    //         TestContext.WriteLine("");
-    //         for (int j = 0; j < ids1.Length; j++)
-    //         {
-    //             var a = ids1[j];
-    //             var b = sorted[j];
-    //
-    //             var payloadA = Ksuid.Parse(a);
-    //             var payloadB = Ksuid.Parse(b);
-    //             Assert.AreEqual(a, b, "payloadA: {0} , payloadB: {1}", 
-    //                 string.Join("",payloadA.GetBytes().Select(x =>x.ToString("000")).ToArray()), 
-    //                 string.Join("", payloadB.GetBytes().Select(x => x.ToString("000")).ToArray()));
-    //         }
-    //     }
-    // }
+    [Test]
+    public void NextKsuid_ReturnsLexicallySortableIds_BasedOnGenerationSequence()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            var ids1 = Enumerable.Range(0, 10).Select(_ =>  Ksuid.NextKsuid().ToString()).ToArray();
+            var sorted = ids1.OrderBy(x => x, StringComparer.Ordinal).ToArray();
+            
+            // TestContext.WriteLine(string.Join("\n",ids1.Select(x => 
+            //     string.Join(";",  Ksuid.Parse(x).GetBytes().Select(b => b.ToString("000")).ToArray()) + " - " + x )));
+            // TestContext.WriteLine(string.Join("\n", sorted.Select(x => 
+            //     string.Join(";", Ksuid.Parse(x).GetBytes().Select(b => b.ToString("000")).ToArray()) + " - " + x )));
+            // TestContext.WriteLine("");
+            for (int j = 0; j < ids1.Length; j++)
+            {
+                var a = ids1[j];
+                var b = sorted[j];
+    
+                var payloadA = Ksuid.Parse(a);
+                var payloadB = Ksuid.Parse(b);
+                Assert.AreEqual(a, b, "payloadA: {0} , payloadB: {1}", 
+                    string.Join("",payloadA.GetBytes().Select(x =>x.ToString("000")).ToArray()), 
+                    string.Join("", payloadB.GetBytes().Select(x => x.ToString("000")).ToArray()));
+            }
+        }
+    }
 
     [Test]
     public void TryParse_ForInvalidText_ReturnsFalse()
@@ -96,46 +93,35 @@ public class StructKsuidTests
         Assert.IsFalse(res);
     }
 
-    // [TestCase(null)]
-    // [TestCase(10)]
-    // [TestCase(21)]
-    // public void Parse_ThrowsOnInvalidSizedArray(int? length)
-    // {
-    //     byte[]? arr = length != null ? new byte[length.Value] : null;
-    //
-    //     Assert.Throws<ArgumentException>(() => Ksuid.Parse(arr));
-    // }
+    [TestCase(null)]
+    [TestCase(10)]
+    [TestCase(21)]
+    public void Parse_ThrowsOnInvalidSizedArray(int? length)
+    {
+        byte[]? arr = length != null ? new byte[length.Value] : null;
     
-    // [Test]
-    // public void Parse_ReturnsCorrectBytePayload()
-    // {
-    //     const string text = "22hFVr9JAh8wlknAlKEzwpW1CXw";
-    //     byte[] expectedBytes = new byte[]
-    //     {
-    //         14,
-    //         82,
-    //         105,
-    //         147,
-    //         207,
-    //         205,
-    //         13,
-    //         91,
-    //         204,
-    //         227,
-    //         100,
-    //         125,
-    //         150,
-    //         101,
-    //         130,
-    //         56,
-    //         170,
-    //         122,
-    //         80,
-    //         106
-    //     };
-    //
-    //     var outputBytes = StructKsuid.Ksuid.Parse(text).GetBytes();
-    //     CollectionAssert.AreEqual(expectedBytes, outputBytes);
-    // }
+        Assert.Throws<ArgumentException>(() => Ksuid.FromBytes(arr));
+    }
+
+    [Test]
+    public void GetBytes_FromBytes_ReturnEquivalentKsuid()
+    {
+        var id = Ksuid.RandomKsuid();
+        var bytes = id.GetBytes();
+        var second = Ksuid.FromBytes(bytes);
+        
+        Assert.AreEqual(id, second);
+    }
+
+    [Test]
+    public void FromTimestamp_ReturnsNewKsuid_WithGivenTimestamp_RoundedToSeconds()
+    {
+        var ts = DateTime.UtcNow;
+        var id = Ksuid.FromTimestamp(ts);
+        var idts = id.TimestampUtc;
+        ts = new DateTime(ts.Year, ts.Month, ts.Day, ts.Hour, ts.Minute, ts.Second);
+        
+        Assert.AreEqual(ts, idts);
+    }
     
 }
