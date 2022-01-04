@@ -11,6 +11,7 @@
         <PackageProjectUrl>https://github.com/pilotMike/StructKsuid</PackageProjectUrl>
         <RepositoryUrl>https://github.com/pilotMike/StructKsuid</RepositoryUrl>
         <PackageTags>ksuid</PackageTags>
+        <PackageVersion>1.0.1</PackageVersion>
     </PropertyGroup>
 
 </Project>
