@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructKsuid", "StructKsuid\StructKsuid.csproj", "{801A18C3-3C2A-4F8A-92CB-4B053AE6ED15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructKsuid.Tests", "StructKsuid.Tests\StructKsuid.Tests.csproj", "{C8EBB315-6641-414E-97EC-F0ECBEEDE016}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructKsuid.Benchmark", "StructKsuid.Benchmark\StructKsuid.Benchmark.csproj", "{45701264-9451-4DFC-9950-CDD48535800C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{801A18C3-3C2A-4F8A-92CB-4B053AE6ED15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{801A18C3-3C2A-4F8A-92CB-4B053AE6ED15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{801A18C3-3C2A-4F8A-92CB-4B053AE6ED15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{801A18C3-3C2A-4F8A-92CB-4B053AE6ED15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8EBB315-6641-414E-97EC-F0ECBEEDE016}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8EBB315-6641-414E-97EC-F0ECBEEDE016}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8EBB315-6641-414E-97EC-F0ECBEEDE016}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8EBB315-6641-414E-97EC-F0ECBEEDE016}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45701264-9451-4DFC-9950-CDD48535800C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45701264-9451-4DFC-9950-CDD48535800C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45701264-9451-4DFC-9950-CDD48535800C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45701264-9451-4DFC-9950-CDD48535800C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
