@@ -52,6 +52,11 @@ Not guaranteed to be sortable from the last, except by timestamp.
 
 `var timestampUtc = ksuid.TimestampUtc`
 
+Ksuid implements IComparable and IEquatable, and has the `==` and `!=` operators.  
+`ksuida.CompareTo(ksuidb)`  
+`ksuida.Equals(ksuidb)`  
+`ksuida == ksuidb`  
+
 # Cautions
 I did not make a serializer for this Ksuid. 
 
