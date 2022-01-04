@@ -198,7 +198,11 @@ public readonly struct Ksuid : IEquatable<Ksuid>, IComparable<Ksuid>
         total = _b.CompareTo(other._b);
         return total;
     }
-    
+
+    public static bool operator ==(Ksuid a, Ksuid b) => a.Equals(b);
+
+    public static bool operator !=(Ksuid a, Ksuid b) => !a.Equals(b);
+
     #endregion
 
 
