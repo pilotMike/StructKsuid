@@ -15,7 +15,6 @@ internal static class InternalRandom
     private static ulong lastPayloadA;
     private static ulong lastPayloadB;
     
-    // dot KSUID uses this approach, but I don't think it will work for my use case
     private static readonly Random GlobalRandom = new ();
     private static readonly ThreadLocal<Random> LocalRandom = new (() =>
     {
